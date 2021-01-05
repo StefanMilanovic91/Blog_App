@@ -1,0 +1,10 @@
+{
+    "version": 3,
+    "mappings": "ACAA,AAAA,OAAO,CAAC;EACJ,MAAM,EAAE,IAAI;EACZ,UAAU,EAAE,UAAU;CAAG;;AAC7B,AAAA,YAAY,CAAC;EACT,MAAM,EAAE,KAAK;CAAG;;AAEpB,AAAA,SAAS,AAAA,IAAK,CAAA,KAAK,EAAE;EACjB,OAAO,EAAE,KAAK;CAAG",
+    "sources": [
+        "../style/sass/main.sass",
+        "../style/sass/components/_navbar.sass"
+    ],
+    "names": [],
+    "file": "main.css"
+}

@@ -1,0 +1,15 @@
+.navbar {
+  height: 56px;
+  -webkit-transition: height .3s;
+  -o-transition: height .3s;
+  transition: height .3s;
+}
+
+.navbar-show {
+  height: 170px;
+}
+
+.collapse:not(.show) {
+  display: block;
+}
+/*# sourceMappingURL=main.css.map */

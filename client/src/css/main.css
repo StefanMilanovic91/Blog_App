@@ -3,10 +3,11 @@
   -webkit-transition: height .3s;
   -o-transition: height .3s;
   transition: height .3s;
+  overflow-y: hidden;
 }
 
 .navbar-show {
-  height: 170px;
+  height: 175px;
 }
 
 .collapse:not(.show) {

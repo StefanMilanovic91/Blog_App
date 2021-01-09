@@ -11,6 +11,7 @@ const Register = () => {
     }
 
     return (
+        <div className="Page">
         <div className="container">
             <div className="row justify-content-center">
                 <div className="col-12 col-md-8">
@@ -35,6 +36,7 @@ const Register = () => {
                         <button onClick={submit} className="btn btn-block btn-success">SUBMIT</button>
                     </form>
                 </div>
+            </div>
             </div>
         </div>
     )

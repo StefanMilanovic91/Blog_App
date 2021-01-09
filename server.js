@@ -10,12 +10,14 @@ const app = express();
 connectDB();  
 
 // middlewares
+app.use(express.json());
 
+app.use('/user', require('./routes/userAuthentication/userAuthentication')); 
 
 
 
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
+ 
+app.listen(PORT, () => {   
     console.log('Start server on port ' + PORT);
-});
+}); 

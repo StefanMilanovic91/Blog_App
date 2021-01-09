@@ -1,3 +1,56 @@
+.Page {
+  margin-top: 56px;
+}
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 20px;
+  height: 19px;
+}
+
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  border-color: #fff transparent #fff transparent;
+  -webkit-animation: lds-dual-ring 1.2s linear infinite;
+          animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@-webkit-keyframes lds-dual-ring {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+@keyframes lds-dual-ring {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+            transform: rotate(360deg);
+  }
+}
+
+.Header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
 .navbar {
   height: 56px;
   -webkit-transition: height .3s;
@@ -10,7 +63,32 @@
   height: 175px;
 }
 
+.navbar-auth-show {
+  height: 135px;
+}
+
 .collapse:not(.show) {
   display: block;
+}
+
+.Topics .topic-link {
+  display: block;
+  text-decoration: none;
+}
+
+.Topics .topic-link:hover p {
+  text-decoration: underline;
+}
+
+.Topics .topic-link:hover span {
+  text-decoration: none;
+}
+
+.Topics .card span {
+  text-decoration: none;
+}
+
+.Topics__add-new-topics h3 {
+  font-weight: 300;
 }
 /*# sourceMappingURL=main.css.map */

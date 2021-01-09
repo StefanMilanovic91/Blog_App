@@ -1,13 +1,30 @@
 import React, { useState } from 'react'
+import { useHistory } from 'react-router-dom';
+import AuthService from '../../../services/auth-service/AuthService';
+import { setAlert } from '../../../store/actions/alertActions';
 
 const Register = () => {
 
     const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+    const [startRegister, setStartRegister] = useState(false);
+
+    const history = useHistory();
 
     const submit = (e) => {
         e.preventDefault();
-        // send reg data for register// ( AuthService )
-        console.log(formData);
+        setStartRegister(true);
+        // send register data
+        AuthService.register(formData).catch(res => res.data).catch(data => {
+            console.log(data);
+            history.push('/login');
+            setStartRegister(false);
+
+        }).catch(err => {
+            setAlert({ msg: err.response.data.msg, class: 'danger' });
+            console.log(err.response.data);
+            setStartRegister(false);
+
+        });
     }
 
     return (
@@ -33,7 +50,7 @@ const Register = () => {
                             <label htmlFor="password">Password</label>
                             <input onChange={(e) => setFormData({...formData, [e.target.name]: e.target.value}) } value={formData.password} name="password" type="password" className="form-control" placeholder="Set your password(min length 5 character)" />
                         </div>
-                        <button onClick={submit} className="btn btn-block btn-success">SUBMIT</button>
+                        <button onClick={submit} className="btn btn-block btn-success">{!startRegister ? "SUBMIT" : <div className="lds-dual-ring"></div>}</button>
                     </form>
                 </div>
             </div>

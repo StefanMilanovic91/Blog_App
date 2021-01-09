@@ -12,6 +12,7 @@ const Login = ({ logInUser, setAlert }) => {
 
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [startLogin, setStartLogin] = useState(false);
+    
     const submit = (e) => {
         e.preventDefault();
         setStartLogin(true);

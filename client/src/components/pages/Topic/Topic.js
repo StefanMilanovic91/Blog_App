@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { withRouter, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 const Topic = () => {
 
@@ -19,7 +19,7 @@ const Topic = () => {
                     <div className="col-12 mb-5  px-0">
                         <div className="card">
                             <div className="card-header">
-                                Post Name
+                                Post Title
                         </div>
                             <div className="card-body">
                                 Post Content
@@ -32,7 +32,7 @@ const Topic = () => {
                     <div className="col-12 mb-5  px-0">
                         <div className="card">
                             <div className="card-header">
-                                Post Name
+                                Post Title
                         </div>
                             <div className="card-body">
                                 Post Content
@@ -45,7 +45,7 @@ const Topic = () => {
                     <div className="col-12 mb-5  px-0">
                         <div className="card">
                             <div className="card-header">
-                                Post Name
+                                Post Title
                         </div>
                             <div className="card-body">
                                 Post Content
@@ -58,7 +58,7 @@ const Topic = () => {
                     <div className="col-12 mb-5  px-0">
                         <div className="card">
                             <div className="card-header">
-                                Post Name
+                                Post Title
                         </div>
                             <div className="card-body">
                                 Post Content
@@ -71,7 +71,7 @@ const Topic = () => {
                     <div className="col-12 mb-5  px-0">
                         <div className="card">
                             <div className="card-header">
-                                Post Name
+                                Post Title
                         </div>
                             <div className="card-body">
                                 Post Content

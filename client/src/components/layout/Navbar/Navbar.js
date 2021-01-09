@@ -11,12 +11,11 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
     const toggleMenuHendler = () => setToggleMenu(!toggleMenu);
     let navbarClasses = ["navbar navbar-expand-md navbar-dark bg-dark"].join(' ');
     if (toggleMenu) {
-
         navbarClasses = ["navbar navbar-show navbar-expand-md navbar-dark bg-dark"].join(' ');
-        if(isAuth) navbarClasses = ["navbar navbar-auth-show navbar-expand-md navbar-dark bg-dark"].join(' ');
+        if (isAuth) navbarClasses = ["navbar navbar-auth-show navbar-expand-md navbar-dark bg-dark"].join(' ');
     }
 
-    
+
 
     const logOut = () => {
         // remove data from local storage
@@ -26,26 +25,27 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
     }
 
     let links = <Fragment>
-        <li className="nav-item">
-            <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
-        </li>
-        <li className="nav-item">
-            <NavLink to="/register" className="nav-link" >Register</NavLink>
-        </li>
-        <li className="nav-item">
-            <NavLink to="/login" className="nav-link" >Log In</NavLink>
-        </li>
-    </Fragment>
+                    <li className="nav-item">
+                        <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
+                    </li>
+                    <li className="nav-item">
+                        <NavLink to="/register" className="nav-link" >Register</NavLink>
+                    </li>
+                    <li className="nav-item">
+                        <NavLink to="/login" className="nav-link" >Log In</NavLink>
+                    </li>
+                </Fragment>
 
-    if (isAuth && !loading)
+    if (isAuth && !loading){
         links = <Fragment>
             <li className="nav-item">
                 <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink exact to="" className="nav-link" onClick={logOut} >Log Out</NavLink>
+                <NavLink exact to="/" className="nav-link" onClick={logOut} >Log Out</NavLink>
             </li>
         </Fragment>
+    }
 
     return (
         <header className="Header">

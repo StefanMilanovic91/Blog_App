@@ -1,11 +1,90 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
+import TopicServices from '../../../services/topic-services/TopicServices';
+import AuthService from '../../../services/auth-service/AuthService';
 
-const Topics = ({isAuth, loading, name}) => {
+import Topic from './Topic/Topic';
+import Alert from '../../layout/Alert/Alert';
 
-    let title = <Fragment><span className="text-danger">Hello Dear Guest,</span> please log in for a full user expirience.</Fragment>;
+import { setTopics } from '../../../store/actions/topicActions';
 
+const Topics = ({isAuth, loading, name, topics, setTopics}) => {
+
+    const [loader, setLoader] = useState(false);
+    const [allTopics, setAllTopics] = useState(null);
+    
+    // msg alert from response
+    const [alert, setAlert] = useState(null);
+
+    
+    useEffect(() => {
+
+        if (topics.length === 0 && topics !== null) {
+
+            // get all topics
+            TopicServices.getAllTopics().then(res => res.data).then(data => {
+                setTopics(data.topics);
+                let allTopics = data.topics.map(topic => <Topic topic={topic} key={topic._id} />);
+                setAllTopics(allTopics);
+
+            }).catch(err => {
+
+                if (err.response.data.errors) {
+                    console.log(err.response.data.errors[0].msg);
+                    setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
+                    setTimeout(() => setAlert(null), 3000);
+                }          
+            })
+        } else {
+            let allTopics = topics.map(topic => <Topic topic={topic} key={topic._id} />);
+            setAllTopics(allTopics);
+        }
+        
+    }, []);
+
+    
+    
+    
+
+
+    // add new topic request
+    const [newTopic, setNewTopic] = useState({ title: "" });
+
+    const submitTopic = (e) => {
+        e.preventDefault();
+        setLoader(true);
+
+        let token = AuthService.getLocalData();
+        if (token) {
+            TopicServices.addTopic({ title: newTopic.title }, token).then(res => res.data).then(data => {
+                // update topics
+                let allTopics = data.topics.map(topic => <Topic topic={topic} key={topic._id} />);
+                setAllTopics(allTopics);
+
+                setAlert({msg: data.msg, class: "success"});
+                setLoader(false);
+                setTimeout(() => setAlert(null), 3000);
+            }).catch(err => {
+                setAlert({msg: err.response.data.errors[0].msg, class: 'danger'});
+                setLoader(false);
+                setTimeout(() => setAlert(null), 3000);
+            });
+        }
+        
+    }
+
+
+
+
+
+    // subtitle (login/logout)
+    let subTitle = <Fragment><span className="text-danger">Hello Dear Guest,</span> please log in for a full user expirience.</Fragment>;
+    if (isAuth && !loading) {
+    subTitle = <Fragment> <span className="text-danger">Hello {name},</span> let's blog...</Fragment>
+    }
+    
+    // add topic input (login/logout)
     let addTopic = <Fragment>
 
                         <div className="Topics__add-new-topics">
@@ -15,13 +94,15 @@ const Topics = ({isAuth, loading, name}) => {
                             <div className="row">
                                 <div className="col-12 col-md-8">
                                     <div className="form-group">
-                                        <input type="text" className="form-control" placeholder="Name of the New Topic" />
+                                        <input onChange={(e) => setNewTopic({ ...newTopic, [e.target.name]: e.target.value })} value={newTopic.title} type="text" className="form-control" placeholder="Name of the New Topic" name="title" />
                                     </div>
-                                    <button className="btn btn-outline-info d-block mr-auto">Add Topic</button>
+                                    <button onClick={submitTopic} className="btn btn-info d-block mr-auto">{loader ? <div className="lds-dual-ring"></div> : 'ADD TOPIC'}</button>
                                 </div>
                             </div>
                         </div>
                 </Fragment>
+
+    
 
     
 
@@ -31,90 +112,12 @@ const Topics = ({isAuth, loading, name}) => {
             <div className="container">
                 <div className="row justify-content-center flex-column">
                     <h1 className="display-4 pt-5 ml-3 mb-4">Popular Topics</h1>
-                    <p className="mb-5 pb-5 ml-3">{isAuth && !loading ? <Fragment> <span className="text-danger">Hello {name},</span> let's blog...</Fragment> : title}</p>
+                    <p className="Topics__sub-title mb-5 pb-5 ml-3">{!loading && subTitle}</p>
                 </div>
                 <div className="row">
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Technology</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Cars</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Culture</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">History</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Mathematics</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Science</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Corona</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
-                    <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                        <NavLink to="topics/topic/technology" className="topic-link">
-                            <div className="card">
-                                <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
-                                    <p className="mb-0">Other</p>
-                                    <span className="badge badge-info">12</span>
-                                </div>
-                            </div>
-                        </NavLink>
-                    </div>
+                    {allTopics === null ? <div className="lds-dual-ring-big mx-auto"></div> : allTopics}
                 </div>
+                <Alert alert={alert} />
                 {isAuth && !loading && addTopic}
             </div>
         </div>
@@ -125,8 +128,9 @@ const mapStateToProps = state => {
     return {
         isAuth: state.authReducer.isAuthenticated,
         loading: state.authReducer.loading,
-        name: state.authReducer.user
+        name: state.authReducer.user !== null && state.authReducer.user.name,
+        topics: state.topicReducer.topics
     }
 }
 
-export default connect(mapStateToProps)(Topics)
+export default connect(mapStateToProps, { setTopics })(Topics)

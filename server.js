@@ -10,9 +10,10 @@ const app = express();
 connectDB();  
 
 // middlewares
-app.use(express.json());
+app.use(express.json({ extended: false }));
 
 app.use('/user', require('./routes/userAuthentication/userAuthentication')); 
+app.use('/topics', require('./routes/topics/topics')); 
 
 
 

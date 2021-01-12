@@ -6,25 +6,36 @@ import Navbar from './components/layout/Navbar/Navbar';
 import Alert from './components/layout/Alert/Alert';
 
 import Topics from './components/pages/Topics/Topics';
-import Topic from './components/pages/Topic/Topic';
+import TopicPosts from './components/pages/TopicPosts/TopicPosts';
 import Register from './components/pages/Register/Register';
 import Login from './components/pages/Login/Login';
 
-import { endOfAuthLoading, logInUser } from './store/actions/authActions';
+import { endOfAuthLoading, logInUser, logOutUser } from './store/actions/authActions';
 import AuthService from './services/auth-service/AuthService';
+import jwt_decode from 'jwt-decode';
 
 
 
 
-const App = ({ alert, endOfAuthLoading, logInUser }) => { 
+const App = ({ alert, endOfAuthLoading, logInUser, logOutUser }) => { 
 
     useEffect(() => { 
 
         // check local data
-        let userData = AuthService.getLocalData();
-        
-        if (userData !== null) {
-            logInUser(userData);
+        let token = AuthService.getLocalData();
+        if (token !== null) {
+            let decodedToken = jwt_decode(token);
+            let currTime = Math.floor(Date.now() / 1000);
+
+            if (currTime > decodedToken.exp) {
+
+                // logout User
+                logOutUser();
+                AuthService.removeLocalData();
+            } else {
+                logInUser({token, ...decodedToken}); 
+            }
+            
         }
         endOfAuthLoading();
 
@@ -41,7 +52,7 @@ const App = ({ alert, endOfAuthLoading, logInUser }) => {
                 <Route exact path="/" render={() => <Redirect to="/topics" />} />
 
                 <Route exact path="/topics" component={Topics} /> 
-                <Route path="/topics/topic/:id" component={Topic} />
+                <Route path="/topics/topic_posts/:title/:id" component={TopicPosts} />
                 <Route path="/register" component={Register} />
                 <Route path="/login" component={Login} />
                 
@@ -58,4 +69,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, { endOfAuthLoading, logInUser })(App)
+export default connect(mapStateToProps, { endOfAuthLoading, logInUser, logOutUser })(App)

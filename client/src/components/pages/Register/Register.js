@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
+import { connect } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import AuthService from '../../../services/auth-service/AuthService';
 import { setAlert } from '../../../store/actions/alertActions';
 
-const Register = () => {
+const Register = ({setAlert}) => {
 
     const [formData, setFormData] = useState({ name: "", email: "", password: "" });
     const [startRegister, setStartRegister] = useState(false);
@@ -14,16 +15,17 @@ const Register = () => {
         e.preventDefault();
         setStartRegister(true);
         // send register data
-        AuthService.register(formData).catch(res => res.data).catch(data => {
-            console.log(data);
-            history.push('/login');
+        AuthService.register(formData).then(res => res.data).then(data => {
             setStartRegister(false);
-
-        }).catch(err => {
-            setAlert({ msg: err.response.data.msg, class: 'danger' });
-            console.log(err.response.data);
+            setAlert({ msg: data.msg, class: 'success' });
+            setTimeout(() => history.push('/login') , 3000);
+            
+            
+        }).catch(error => {
+            if (error.response.data.errors) {
+                setAlert({ msg: error.response.data.errors[0].msg, class: 'danger' });
+            }
             setStartRegister(false);
-
         });
     }
 
@@ -59,4 +61,4 @@ const Register = () => {
     )
 }
 
-export default Register
+export default connect(null, { setAlert })(Register)

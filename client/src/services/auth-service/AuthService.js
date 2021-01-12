@@ -2,29 +2,28 @@ import axios from 'axios';
 
 class AuthService {
 
-    static register(body) {
-        return axios.post('/register', body);
+    static register(formData) {
+
+        let body = JSON.stringify(formData);
+
+        return axios.post('/user/register', body, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
     }
 
     static logIn(body) {
         return axios.post('/user/login', body);
     }
 
-    static saveDataLocally(data) {
-        localStorage.setItem('auth-token', data.token);
-        localStorage.setItem('user', data.name);
+    static saveDataLocally(token) {
+        localStorage.setItem('auth-token', token);
     }
 
-    static getLocalData(data) {
+    static getLocalData() {
         let token = localStorage.getItem('auth-token');
-        let name = localStorage.getItem('user');
-        let userData = null
-        if (token) 
-            userData = {
-                token, name
-            }
-
-        return userData;
+        return token ? JSON.parse(token) : null;
     }
 
     static removeLocalData() {

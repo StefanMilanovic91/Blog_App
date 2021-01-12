@@ -12,7 +12,10 @@ const logInUser = (state, payload) => {
     return {
         ...state,
         token: payload.token,
-        user: payload.name,
+        user: {
+            name: payload.name,
+            id: payload.id
+        },
         isAuthenticated: true,
         loading: false
     }

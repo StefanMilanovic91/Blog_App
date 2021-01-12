@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import AuthService from '../../../services/auth-service/AuthService';
 import { connect } from 'react-redux';
-
+import  jwt_decode  from 'jwt-decode';
 import { logInUser } from '../../../store/actions/authActions';
 import { setAlert } from '../../../store/actions/alertActions';
 import { useHistory } from 'react-router-dom';
@@ -16,21 +16,27 @@ const Login = ({ logInUser, setAlert }) => {
     const submit = (e) => {
         e.preventDefault();
         setStartLogin(true);
-        setTimeout(() => {
-            AuthService.logIn(formData).then(res => res.data).then(data => {
-                setStartLogin(false);
-                // save token loacally
-                AuthService.saveDataLocally(data);
-                // save to store
-                logInUser(data);
-                // redirect to home page
-                history.push('/topics');
 
-            }).catch(err => {
-                setStartLogin(false);
-                setAlert({ msg: err.response.data.msg, class: 'danger' });
-            });
-        }, 2000);
+        AuthService.logIn(formData).then(res => res.data).then(data => {
+            setStartLogin(false);
+
+            // save token loacally
+            AuthService.saveDataLocally(JSON.stringify(data.token));
+
+            // save to store
+            let decode = jwt_decode(data.token);
+            logInUser({ token: data.token, ...decode });
+            
+            // redirect to home page
+            history.push('/topics');
+
+        }).catch(err => {
+            setStartLogin(false);
+            if (err) {
+                setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
+            }
+            
+        });
 
 
     }

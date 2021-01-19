@@ -1,22 +1,22 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { NavLink } from 'react-router-dom';
+
 import TopicServices from '../../../services/topic-services/TopicServices';
 import AuthService from '../../../services/auth-service/AuthService';
+import IsAuth from '../../auxiliary/IsAuth';
+import NotAuth from '../../auxiliary/NotAuth';
 
 import Topic from './Topic/Topic';
 import Alert from '../../layout/Alert/Alert';
 
-import { setTopics } from '../../../store/actions/topicActions';
+import { setTopics, setNewTopic, startLoading, endLoading } from '../../../store/actions/topicActions';
+import { setAlert } from '../../../store/actions/alertActions';
 
-const Topics = ({isAuth, loading, name, topics, setTopics}) => {
 
-    const [loader, setLoader] = useState(false);
-    const [allTopics, setAllTopics] = useState(null);
+const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNewTopic, startLoading }) => {
+
     
-    // msg alert from response
-    const [alert, setAlert] = useState(null);
-
+    const [newTopic, setTypedTopic] = useState({ title: "" });
     
     useEffect(() => {
 
@@ -24,22 +24,19 @@ const Topics = ({isAuth, loading, name, topics, setTopics}) => {
 
             // get all topics
             TopicServices.getAllTopics().then(res => res.data).then(data => {
+
+                // set topics to store
                 setTopics(data.topics);
-                let allTopics = data.topics.map(topic => <Topic topic={topic} key={topic._id} />);
-                setAllTopics(allTopics);
 
             }).catch(err => {
-
-                if (err.response.data.errors) {
-                    console.log(err.response.data.errors[0].msg);
+                let errors = err.response.data.errors
+                if (errors) {
                     setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
-                    setTimeout(() => setAlert(null), 3000);
-                }          
+                } else {
+                    window.location.reload(); 
+                }
             })
-        } else {
-            let allTopics = topics.map(topic => <Topic topic={topic} key={topic._id} />);
-            setAllTopics(allTopics);
-        }
+        };
         
     }, []);
 
@@ -49,58 +46,31 @@ const Topics = ({isAuth, loading, name, topics, setTopics}) => {
 
 
     // add new topic request
-    const [newTopic, setNewTopic] = useState({ title: "" });
+    
 
     const submitTopic = (e) => {
         e.preventDefault();
-        setLoader(true);
-
+        startLoading();
         let token = AuthService.getLocalData();
-        if (token) {
-            TopicServices.addTopic({ title: newTopic.title }, token).then(res => res.data).then(data => {
-                // update topics
-                let allTopics = data.topics.map(topic => <Topic topic={topic} key={topic._id} />);
-                setAllTopics(allTopics);
 
+        if (token) {
+
+            TopicServices.addTopic({ title: newTopic.title }, token).then(res => res.data).then(data => {
+                
+                // update topics
+                setNewTopic(data.topic);
                 setAlert({msg: data.msg, class: "success"});
-                setLoader(false);
-                setTimeout(() => setAlert(null), 3000);
+        
+
             }).catch(err => {
-                setAlert({msg: err.response.data.errors[0].msg, class: 'danger'});
-                setLoader(false);
-                setTimeout(() => setAlert(null), 3000);
+                let errors = err.response.data.errors
+                if(errors)
+                setAlert({msg: errors[0].msg, class: 'danger'});
+        
             });
         }
         
     }
-
-
-
-
-
-    // subtitle (login/logout)
-    let subTitle = <Fragment><span className="text-danger">Hello Dear Guest,</span> please log in for a full user expirience.</Fragment>;
-    if (isAuth && !loading) {
-    subTitle = <Fragment> <span className="text-danger">Hello {name},</span> let's blog...</Fragment>
-    }
-    
-    // add topic input (login/logout)
-    let addTopic = <Fragment>
-
-                        <div className="Topics__add-new-topics">
-                            <div className="row mt-5 mb-3">
-                                <h3 className="ml-3">Add New Topic</h3>
-                            </div>
-                            <div className="row">
-                                <div className="col-12 col-md-8">
-                                    <div className="form-group">
-                                        <input onChange={(e) => setNewTopic({ ...newTopic, [e.target.name]: e.target.value })} value={newTopic.title} type="text" className="form-control" placeholder="Name of the New Topic" name="title" />
-                                    </div>
-                                    <button onClick={submitTopic} className="btn btn-info d-block mr-auto">{loader ? <div className="lds-dual-ring"></div> : 'ADD TOPIC'}</button>
-                                </div>
-                            </div>
-                        </div>
-                </Fragment>
 
     
 
@@ -112,13 +82,58 @@ const Topics = ({isAuth, loading, name, topics, setTopics}) => {
             <div className="container">
                 <div className="row justify-content-center flex-column">
                     <h1 className="display-4 pt-5 ml-3 mb-4">Popular Topics</h1>
-                    <p className="Topics__sub-title mb-5 pb-5 ml-3">{!loading && subTitle}</p>
+                    <p className="Topics__sub-title mb-5 pb-5 ml-3">
+                        {
+                            <Fragment>
+                                <NotAuth>
+                                    <Fragment><span className="text-danger">Hello Dear Guest,</span> please log in for a full user expirience.</Fragment>
+                                </NotAuth>
+                                <IsAuth>
+                                    <Fragment><span className="text-danger">Hello {name},</span> let's blog...</Fragment>
+                                </IsAuth>
+                            </Fragment>
+                        }
+                    </p>
                 </div>
                 <div className="row">
-                    {allTopics === null ? <div className="lds-dual-ring-big mx-auto"></div> : allTopics}
+                    {
+                        // render topics from store
+                        topicsLoading && topics.length < 1 ?
+                            <div className="lds-dual-ring-big mx-auto"></div> :
+                            topics.map(topic => <Topic topic={topic} key={topic._id} />)
+                    }
+                    {
+                        //  show if click on add topic btn
+                        topicsLoading && topics.length > 1 && <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
+                                                                    <a href="#" className="topic-link disabled">
+                                                                        <div className="card">
+                                                                            <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
+                                                                                <div className="lds-dual-ring mx-auto"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </a>
+                                                                </div>
+                    }
                 </div>
+
                 <Alert alert={alert} />
-                {isAuth && !loading && addTopic}
+                
+                {/* show add topic input if user is loge in */}
+                <IsAuth>
+                    <div className="Topics__add-new-topics">
+                        <div className="row mt-5 mb-3">
+                            <h3 className="ml-3">Add New Topic</h3>
+                        </div>
+                        <div className="row">
+                            <div className="col-12 col-md-8">
+                                <div className="form-group">
+                                    <input onChange={(e) => setTypedTopic({ ...newTopic, [e.target.name]: e.target.value })} value={newTopic.title} type="text" className="form-control" placeholder="Name of the New Topic" name="title" />
+                                </div>
+                                <button onClick={submitTopic} className="btn btn-info d-block mr-auto">ADD TOPIC</button>
+                            </div>
+                        </div>
+                    </div>
+                </IsAuth>
             </div>
         </div>
     )
@@ -126,11 +141,11 @@ const Topics = ({isAuth, loading, name, topics, setTopics}) => {
 
 const mapStateToProps = state => {
     return {
-        isAuth: state.authReducer.isAuthenticated,
-        loading: state.authReducer.loading,
         name: state.authReducer.user !== null && state.authReducer.user.name,
-        topics: state.topicReducer.topics
+        topics: state.topicReducer.topics,
+        alert: state.alertReducer.alert,
+        topicsLoading: state.topicReducer.loading
     }
 }
 
-export default connect(mapStateToProps, { setTopics })(Topics)
+export default connect(mapStateToProps, { setTopics, setAlert, setNewTopic, startLoading, endLoading })(Topics)

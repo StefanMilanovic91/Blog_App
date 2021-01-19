@@ -4,7 +4,9 @@ import { useHistory } from 'react-router-dom';
 import AuthService from '../../../services/auth-service/AuthService';
 import { setAlert } from '../../../store/actions/alertActions';
 
-const Register = ({setAlert}) => {
+import Alert from '../../layout/Alert/Alert';
+
+const Register = ({ setAlert, alert }) => {
 
     const [formData, setFormData] = useState({ name: "", email: "", password: "" });
     const [startRegister, setStartRegister] = useState(false);
@@ -18,7 +20,7 @@ const Register = ({setAlert}) => {
         AuthService.register(formData).then(res => res.data).then(data => {
             setStartRegister(false);
             setAlert({ msg: data.msg, class: 'success' });
-            setTimeout(() => history.push('/login') , 3000);
+            setTimeout(() => history.push('/login'), 3000);
             
             
         }).catch(error => {
@@ -31,34 +33,43 @@ const Register = ({setAlert}) => {
 
     return (
         <div className="Page">
-        <div className="container">
-            <div className="row justify-content-center">
-                <div className="col-12 col-md-8">
-                    <h1 className="display-4 py-5">Register</h1>
+            <div className="container">
+                <div className="row justify-content-center">
+                    <div className="col-12 col-md-8">
+                        <h1 className="display-4 pt-5">Register</h1>
+                    </div>
                 </div>
-            </div>
-            <div className="row justify-content-center">
-                <div className="col-12 col-md-8">
-                    <form>
-                        <div className="form-group">
-                            <label htmlFor="name">Name</label>
-                            <input onChange={(e) => setFormData({...formData, [e.target.name]: e.target.value}) } value={formData.name} name="name" type="text" className="form-control" placeholder="Your name" />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="email">E-mail</label>
-                            <input onChange={(e) => setFormData({...formData, [e.target.name]: e.target.value}) } value={formData.email} name="email" type="text" className="form-control" placeholder="Your email" />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <input onChange={(e) => setFormData({...formData, [e.target.name]: e.target.value}) } value={formData.password} name="password" type="password" className="form-control" placeholder="Set your password(min length 5 character)" />
-                        </div>
-                        <button onClick={submit} className="btn btn-block btn-success">{!startRegister ? "SUBMIT" : <div className="lds-dual-ring"></div>}</button>
-                    </form>
+
+                {<Alert alert={alert} />}
+                
+                <div className="row justify-content-center pt-5">
+                    <div className="col-12 col-md-8">
+                        <form>
+                            <div className="form-group">
+                                <label htmlFor="name">Name</label>
+                                <input onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.name} name="name" type="text" className="form-control" placeholder="Your name" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="email">E-mail</label>
+                                <input onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.email} name="email" type="text" className="form-control" placeholder="Your email" />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="password">Password</label>
+                                <input onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.password} name="password" type="password" className="form-control" placeholder="Set your password(min length 5 character)" />
+                            </div>
+                            <button onClick={submit} className="btn btn-block btn-success">{!startRegister ? "SUBMIT" : <div className="lds-dual-ring"></div>}</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
     )
+};
+
+const mapStateToProps = state => {
+    return {
+        alert: state.alertReducer.alert
+    }
 }
 
-export default connect(null, { setAlert })(Register)
+export default connect(mapStateToProps, { setAlert })(Register)

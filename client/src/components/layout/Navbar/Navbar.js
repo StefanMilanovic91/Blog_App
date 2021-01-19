@@ -42,7 +42,7 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
                 <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink exact to="/" className="nav-link" onClick={logOut} >Log Out</NavLink>
+                <NavLink exact to="!#" className="nav-link" onClick={logOut} >Log Out</NavLink>
             </li>
         </Fragment>
     }

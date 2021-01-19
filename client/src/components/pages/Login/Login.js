@@ -6,7 +6,9 @@ import { logInUser } from '../../../store/actions/authActions';
 import { setAlert } from '../../../store/actions/alertActions';
 import { useHistory } from 'react-router-dom';
 
-const Login = ({ logInUser, setAlert }) => {
+import Alert from '../../layout/Alert/Alert';
+
+const Login = ({ logInUser, setAlert, alert }) => {
 
     const history = useHistory()
 
@@ -27,12 +29,14 @@ const Login = ({ logInUser, setAlert }) => {
             let decode = jwt_decode(data.token);
             logInUser({ token: data.token, ...decode });
             
-            // redirect to home page
-            history.push('/topics');
+            // redirect to previous view
+            history.goBack();
 
         }).catch(err => {
             setStartLogin(false);
-            if (err) {
+            let errors = err.response.data.errors;
+            console.log(errors);
+            if (errors) {
                 setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
             }
             
@@ -46,10 +50,14 @@ const Login = ({ logInUser, setAlert }) => {
             <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-12 col-md-8">
-                        <h1 className="display-4 py-5">Log In</h1>
+                        <h1 className="display-4 pt-5">Log In</h1>
                     </div>
                 </div>
-                <div className="row justify-content-center">
+
+                
+                <Alert alert={alert} />
+
+                <div className="row justify-content-center pt-5">
                     <div className="col-12 col-md-8">
                         <form>
                             <div className="form-group">
@@ -68,6 +76,12 @@ const Login = ({ logInUser, setAlert }) => {
             </div>
         </div>
     )
+};
+
+const mapStateToProps = state => {
+    return {
+        alert: state.alertReducer.alert
+    }
 }
 
-export default connect(null, { logInUser, setAlert })(Login);
+export default connect(mapStateToProps, { logInUser, setAlert })(Login);

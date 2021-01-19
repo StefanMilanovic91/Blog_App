@@ -86,7 +86,7 @@ router.post('/login', [
 
             // find user
             const foundUser = await User.findOne({ email: email });
-
+            
             if (!foundUser) {
                 return res.status(400).json({ errors: [{ msg: 'You are trying to login as an unregistered user. Please register first.' }] })
             }

@@ -14,37 +14,47 @@ const Post = require('../../models/postModel');
 router.get('/', async (req, res) => {
     try {
 
-        // get all topics
-        const allTopics = await Topic.find({});
+        // get all posts and topics
+        let topics = await Topic.find({}).lean();
+        const posts = await Post.find({});
+        
+        // add number of post for certain topic
+        for (let i = 0; i < topics.length; i++) {
+            let counter = 0
+            for (let x = 0; x < posts.length; x++){
+                if (topics[i]._id == posts[x].topic.id) {
+                    topics[i].numberOfPosts = ++counter; 
+                }
+            }
+            
+        }
 
         // reponse
-        res.json({ topics: allTopics });
+        res.json({ topics });
         
     } catch (error) {
         res.status(500).json({ errors: [{ msg: 'Something went wrong.', error }] });
     }
 });
 
-// desc: get topic by id
-// url: /topics/:id
+// desc: get all posts by topic id
+// url: /topics/get_posts/:id
 // public
 
-router.get('/:id', async (req, res) => {
+router.get('/get_posts/:id', async (req, res) => {
     try {
 
         const id = req.params.id;
 
-        //console.log(id);
+        // get posts
+        const posts = await Post.find({ topic: { id: id } });
 
-        // get topic
-        const topic = await Topic.findById({_id: id});
-        //console.log(topic);
-
-        if (!topic) {
-            return res.status(400).json({ errors: [{ msg: 'Post not found.' }] });
+        if (!posts) {
+            return res.status(400).json({ errors: [{ msg: 'Posts for this topic not found.' }] });
         }
+
         // reponse
-        res.json({ topic });
+        res.json({ posts });
         
     } catch (error) {
         res.status(500).json({ errors: [{ msg: 'Something went wrong.', error }] });
@@ -95,11 +105,8 @@ router.post('/add_topic', [auth, [
         // save topic
         await newTopic.save();
 
-        // get all topics
-        const allTopics = await Topic.find({});
-
         // resposne
-        res.json({ topics: allTopics, msg: 'You have successfully created a new topic.' });
+        res.json({ topic: newTopic, msg: 'You have successfully created a new topic.' });
  
 
 
@@ -122,7 +129,7 @@ router.post('/add_post/:id', [auth, [
 
         const { post } = req.body;
         const { name, id } = req.user;
-        const url_id = req.params.id;
+        const topic_id = req.params.id;
 
         // validation
         const errors = validationResult(req);
@@ -132,37 +139,166 @@ router.post('/add_post/:id', [auth, [
         };
 
         // make new post
-        console.log(post);
         let newPost = new Post({
             author: {
-                id: id,
-                name: name
+                id,
+                name
             },
             topic: {
-                id: url_id
+                id: topic_id
             },
             post: post
         });
-
+        // nastavi odavde, vrati postove samo za taj topic, nikako sve...
         await newPost.save();
 
         // get all posts
 
-        let allPosts = await Post.find({});
-
-        res.json({
-            posts: allPosts
-        });
-        // nastavi odavde, pokupi sve podatke iz ovog respona i prikazi ih na stranici...
+        //let allPosts = await Post.find({ topic: { id: topic_id } });
+        
+        res.json({ newPost });
+        
 
         
     } catch (error) {
         res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
     }
 
+});
+
+// desc: add new comment to the certain post
+// url: /topics/add_comment
+// private
+
+router.post('/add_comment', [auth,
+    [
+        check('id', 'Post id is required.').trim().not().isEmpty(),
+        check('comment', 'Comment is required.').trim().not().isEmpty()
+    ]
+], async (req, res) => {
+
+    try {
+        
+        const { id, comment } = req.body;
+        const name = req.user.name;
+        const user_id = req.user.id;
+
+        // validation
+        let errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array(), post_id: id });
+        }
+
+        const post = await Post.findById(id);
+
+        let newComment = {
+            user: {
+                id: user_id,
+                name
+            },
+            comment: {
+                text: comment
+            }
+        }
+
+        post.comments.push(newComment);
+
+        await post.save();
+
+        res.json({comments: post.comments});
+
+        
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
+    }
+        
+});
+
+
+
+
+
+// desc: add new comment to the certain post and certaine comment
+// url: /topics/add_comment_on_comment
+// private
+
+router.post('/add_comment_on_comment', [auth,
+    [
+        check('postId', 'Post id is required.').trim().not().isEmpty(),
+        check('commentId', 'Comment id is required.').trim().not().isEmpty(),
+        check('comment', 'Comment is required.').trim().not().isEmpty()
+    ]
+], async (req, res) => {
+
+    try {
+        const { postId, commentId, comment } = req.body;
+        const name = req.user.name;
+        const user_id = req.user.id;
+
+        // validation
+        let errors = validationResult(req);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array(), comment_id: commentId });
+        }
+
+        let post = await Post.findById(postId);
+
+        // create sub comment
+        let newSubComment = {
+            user: {
+                id: user_id,
+                name
+            },
+            comment:{
+                text: comment
+            }
+
+        }
+
+        // find comment and push sub comment to this comment
+        let commentIndex = post.comments.findIndex(comment => comment._id == commentId);
+        post.comments[commentIndex].comment.comments.push(newSubComment);
+
+        
+
+
+        await post.save();
+
+        res.json({ comments: post.comments });
+        
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
+    }
+        
+});
+
+// desc: delete certain post by id
+// url: /topics/delete_post
+// private
+
+router.delete('/delete_post/:id', auth, async (req, res) => {
+    
+    try {
+        
+        const { id } = req.params;
+        const user_id = req.user.id
+        
+        const post = await Post.findById(id);
+        
+        if (post.author.id.toString() !== user_id) {
+            return res.status(401).json({ errors: [{ msg: "Not Authorized." }] });
+        }
+
+        await post.remove();
+
+        res.json({ msg: 'Post is removed.' });
+
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
+    }
 })
-
-
 
 
 module.exports = router;

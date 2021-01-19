@@ -6,8 +6,8 @@ class TopicServices {
         return axios.get('/topics');
     }
 
-    static getTopicById(id) {
-        return axios.get(`/topics/${id}`);
+    static getPostsByTopicId(id) {
+        return axios.get(`/topics/get_posts/${id}`);
     }
 
     static addTopic(title, token) {
@@ -30,6 +30,36 @@ class TopicServices {
                 "x-auth-token": token
             }
             
+        })
+    }
+
+    static addComment(body, token) {
+
+        return axios.post('/topics/add_comment', body, {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
+        })
+    }
+
+    static addCommentOnComment(body, token) {
+
+        return axios.post('/topics/add_comment_on_comment', body, {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
+        })
+    }
+
+    static removePost(id, token) {
+        
+        return axios.delete(`/topics/delete_post/${id}`,  {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
         })
     }
  

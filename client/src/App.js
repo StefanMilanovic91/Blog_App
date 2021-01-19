@@ -45,7 +45,7 @@ const App = ({ alert, endOfAuthLoading, logInUser, logOutUser }) => {
         <Fragment>
             <Navbar />
             
-            <Alert alert={alert} />
+            {/*<Alert alert={alert} /> stavi alert popup */}
             
 
             <Switch>

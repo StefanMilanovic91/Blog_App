@@ -34,8 +34,30 @@ const PostSchema = new mongoose.Schema({
                 },
             },
             comment: {
-                type: String,
-                required: true
+                text: {
+                    type: String,
+                    required: true
+                },
+                comments: [
+                    {
+                        user: {
+                            id: {
+                                type: mongoose.Schema.Types.ObjectId,
+                                required: true
+                            },
+                            name: {
+                                type: String,
+                                required: true
+                            }
+                        },
+                        comment: {
+                            text: {
+                                type: String,
+                                required: true
+                            }
+                        }
+                    }
+                ]
             }
         }
     ],

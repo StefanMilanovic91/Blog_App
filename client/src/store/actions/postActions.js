@@ -21,15 +21,65 @@ export const removePost = (id) => dispatch => {
     });
 };
 
+export const addComment = (postID, comment) => dispatch => {
+    dispatch({
+        type: actionTypes.ADD_COMMENT,
+        payload: {
+            postID, comment
+        }
+    });
+};
+
+export const addSubComment = (postID, commentID, comment) => dispatch => {
+    
+    dispatch({
+        type: actionTypes.ADD_SUB_COMMENT,
+        payload: {
+            postID, commentID, comment
+        }
+    });
+};
+
+export const removeComment = (postID, commentID) => dispatch => {
+    dispatch({
+        type: actionTypes.REMOVE_COMMENT,
+        payload: {
+            postID,
+            commentID
+        }
+    });
+};
+
+export const removeSubComment = (postID, commentID, subCommentID) => dispatch => {
+    dispatch({
+        type: actionTypes.REMOVE_SUB_COMMENT,
+        payload: {
+            postID,
+            commentID,
+            subCommentID
+        }
+    });
+};
+
+export const updateLike = (postID, data) => dispatch => {
+    
+    dispatch({
+        type: actionTypes.UPDATE_LIKE,
+        payload: {
+            postID, data
+        }
+    });
+};
+
 export const startPostLoading = () => dispatch => {
     dispatch({
-        type: actionTypes.START_POST_LOADING
+        type: actionTypes.START_LOADING
     });
 };
 
 export const endPostLoading = () => dispatch => {
     dispatch({
-        type: actionTypes.END_POST_LOADING
+        type: actionTypes.END_LOADING
     });
 };
 

@@ -13,7 +13,7 @@ import './css/main.css'
 ReactDOM.render(
     <Provider store={store}>
         <BrowserRouter>
-            <App />
+                <App />
         </BrowserRouter>
     </Provider>
     ,

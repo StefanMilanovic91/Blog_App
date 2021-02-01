@@ -30,12 +30,12 @@ const Login = ({ logInUser, setAlert, alert }) => {
             logInUser({ token: data.token, ...decode });
             
             // redirect to previous view
-            history.goBack();
+            history.push('/');
 
         }).catch(err => {
             setStartLogin(false);
             let errors = err.response.data.errors;
-            console.log(errors);
+            
             if (errors) {
                 setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
             }

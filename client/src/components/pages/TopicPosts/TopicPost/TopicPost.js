@@ -1,112 +1,73 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
+// components
 import IsAuth from '../../../auxiliary/IsAuth';
 import NotAuth from '../../../auxiliary/NotAuth';
+import IsAuthor from '../../../auxiliary/IsAuthor';
 import Alert from '../../../layout/Alert/Alert';
 import PostComment from './PostComment/PostComment';
 
-import AuthServices from '../../../../services/auth-service/AuthService';
-import TopicServices from '../../../../services/topic-services/TopicServices';
-
+// actions
 import { setAlert } from '../../../../store/actions/alertActions';
+import { addComment, updateLike, removePost } from '../../../../store/actions/postActions';
 
+// hendlers
+import { addCommentHendler } from '../../../auxiliary/Hendlers/comment-hendlers';
+import { removePostHendler, updateLikeHendler } from '../../../auxiliary/Hendlers/post-hendlers';
 
-const TopicPost = ({post, setAlert, alert, user_id, removePostHendler }) => {
+//icons
+import unlikeIconSrc from '../../../../assets/icons/unlike.png'
+import likeIconSrc from '../../../../assets/icons/like.jpg'
 
+const TopicPost = ({ userID, post, comments, setAlert, alert, addComment, updateLike, removePost }) => {
+    
     const [comment, setComment] = useState({ comment: "" });
-    //const [alert, setAlertMsg] = useState(null);
     const [postID, setPostID] = useState(null);
-    const [comments, setComments] = useState(null);
+    const [likesShow, setLikesShow] = useState(false);
+    let userLiked = false;
 
-
-    useEffect(() => {
-        if (post.comments.length > 0) {
-            setComments(post.comments);
-        } else if (post.comments.length === 0) {
-            //setComments(<p className="mb-0 text-muted">No comments yet</p>);
-        }
-        
-    }, [])
-
-    const submit = (e) => {
-        e.preventDefault();
-        addCommentHendler(post._id, comment.comment);
-    };
-
-    // add comment
-    const addCommentHendler = (id, comment) => {
-        let body = { id, comment }
-        let token = AuthServices.getLocalData();
-
-        if (token !== null) {
-            TopicServices.addComment(body, token).then(res => res.data).then(data => {
-                if (data.comments.length > 0) {
-                    setComments(data.comments);
-                }else if (data.comments.length === 0) {
-                    //setComments(<p className="mb-0 text-muted">No comments yet</p>);
-                }
-            }).catch(err => {
-                let errors = err.response.data.errors;
-                
-                if (errors) {
-                    setPostID(err.response.data.post_id);
-                    setAlert({ msg: errors[0].msg, class: 'danger' });
-                    setTimeout(() => setPostID(null) , 3000);
-                }
-                
-            });
-        }
-        
-    }
-
-    // add sub comment hendler
-    const addSubCommentHendler = (commentId, comment) => {
-            
-            let token = AuthServices.getLocalData();
-            let body = {
-                postId: post._id,
-                commentId,
-                comment
-            }
-
-            if (token !== null) {
-                TopicServices.addCommentOnComment(body, token).then(res => res.data).then(data => {
-                    setComments(data.comments);
-                }).catch(err => {
-                    {
-                        /*let errors = err.response.data.errors;
-                    
-                        if (errors) {
-                            setPostID(err.response.data.post_id);
-                            setAlert({ msg: errors[0].msg, class: 'danger' });
-                            setTimeout(() => setPostID(null) , 3000);
-                        } */
-                    }
-                })
-            }
-            
-    }
-
-    // remove post
-
-    const removePost = (e) => {
-        e.preventDefault();
-
-        removePostHendler(post._id);
-    }
-
+    
     return (
         <div className="col-12 mb-5  px-0">
             <div className="card">
-                <div className="card-header d-flex">
+                <div className="card-header d-flex align-items-center">
                     {post.post}
-                    { user_id === post.author.id && <a onClick={removePost} className="ml-auto" href="https://icon-library.net/icon/delete-icon-png-16x16-21.html" title="Delete Icon Png 16X16 #270781"><img src="https://icon-library.net//images/delete-icon-png-16x16/delete-icon-png-16x16-21.jpg" width="20" /></a>}
+                    <div onClick={() => setLikesShow(!likesShow)} className="Posts__likes-holder">
+                        <img src={likeIconSrc} className="Posts__like-icon" alt="likes" />
+                        <span className="badge badge-info ml-1">{post.likes.length}</span>
+                        <div className={ likesShow ? "Posts__likes Posts__likes-show" : "Posts__likes" }>
+                            {
+                                post.likes.map(like => {
+                                    userLiked = userID === like.author.id;
+                                    return <p key={like._id} className="mb-1 mt-1">{like.author.name}</p>
+                                })
+                            }
+                        </div>
+                    </div>
+                    <IsAuth>
+                        <div onClick={(e) => updateLikeHendler(e, post._id, updateLike, setAlert)} className="Posts__like-btn">
+                            <img src={ !userLiked ? likeIconSrc : unlikeIconSrc} className="Posts__like-icon" alt="" />{ !userLiked ? 'Like' : 'Unlike'}
+                        </div>
+                    </IsAuth>
+                    <IsAuthor contentAuthorID={post.author.id} >
+                        <a onClick={() => removePostHendler(post._id, removePost, setAlert)} className="ml-5" href="/#" title="Delete Post"><img src="https://icon-library.net//images/delete-icon-png-16x16/delete-icon-png-16x16-21.jpg" width="20" alt="Delete post" /></a>
+                    </IsAuthor>
                 </div>
                 <div className="card-body">
+                    <div className="container">
+                        <div className="divider"></div>
+                    </div>
+
                     {
                         comments !== null && comments.length > 0 && comments.map(comment => {
-                            return <PostComment addSubCommentHendler={addSubCommentHendler} postId={post._id} comment={comment} key={comment._id} />
+
+                            return <PostComment
+                                setPostID={setPostID}
+                                postId={post._id}
+                                comment={comment}
+                                key={comment._id}
+                            />
                         })
                     }
                 </div>
@@ -117,16 +78,16 @@ const TopicPost = ({post, setAlert, alert, user_id, removePostHendler }) => {
                         </NotAuth>
                         <IsAuth>
                             <div className="input-group">
-                                <input onChange={(e) => setComment({...comment, [e.target.name]: e.target.value} )} value={comment.comment} name="comment" type="text" className="form-control" placeholder="Comment on post"/>
+                                <input onChange={(e) => setComment({ ...comment, [e.target.name]: e.target.value })} value={comment.comment} name="comment" type="text" className="form-control" placeholder="Comment on post" />
                                 <div className="input-group-append">
-                                    <button onClick={submit} className="btn btn-outline-success" type="button" id="button-addon2">Comment</button>
+                                    <button onClick={(e) => addCommentHendler(e, post._id, comment.comment, setComment, addComment, setAlert, setPostID)} className="btn btn-outline-success" type="button" id="button-addon2">Comment</button>
                                 </div>
                             </div>
                         </IsAuth>
                     </div>
                 </div>
             </div>
-            { postID === post._id ? <Alert alert={alert}/> : null }
+            { postID === post._id && <Alert alert={alert} />}
         </div>
     )
 }
@@ -134,8 +95,8 @@ const TopicPost = ({post, setAlert, alert, user_id, removePostHendler }) => {
 const mapStateToProps = state => {
     return {
         alert: state.alertReducer.alert,
-        user_id: state.authReducer.user !== null && state.authReducer.user.id
+        userID: state.authReducer.user !== null && state.authReducer.user.id 
     }
 }
 
-export default connect(mapStateToProps, { setAlert })(TopicPost)
+export default connect(mapStateToProps, { setAlert, addComment, updateLike, removePost })(TopicPost)

@@ -11,14 +11,16 @@ import Alert from '../../layout/Alert/Alert';
 
 import { setTopics, setNewTopic, startLoading, endLoading } from '../../../store/actions/topicActions';
 import { setAlert } from '../../../store/actions/alertActions';
+import { setPosts } from '../../../store/actions/postActions';
 
 
-const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNewTopic, startLoading }) => {
+const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNewTopic, startLoading, setPosts }) => {
 
     
     const [newTopic, setTypedTopic] = useState({ title: "" });
     
     useEffect(() => {
+        setPosts(null);
 
         if (topics.length === 0 && topics !== null) {
 
@@ -37,7 +39,7 @@ const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNew
                 }
             })
         };
-        
+    // eslint-disable-next-line
     }, []);
 
     
@@ -89,7 +91,7 @@ const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNew
                                     <Fragment><span className="text-danger">Hello Dear Guest,</span> please log in for a full user expirience.</Fragment>
                                 </NotAuth>
                                 <IsAuth>
-                                    <Fragment><span className="text-danger">Hello {name},</span> let's blog...</Fragment>
+                                    <Fragment><span className="text-danger">Hello {name},</span> let's comment on the topics...</Fragment>
                                 </IsAuth>
                             </Fragment>
                         }
@@ -105,7 +107,7 @@ const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNew
                     {
                         //  show if click on add topic btn
                         topicsLoading && topics.length > 1 && <div className="col-12 col-sm-4 col-md-3 mb-3 mb-md-5">
-                                                                    <a href="#" className="topic-link disabled">
+                                                                    <a href="/#" className="topic-link disabled">
                                                                         <div className="card">
                                                                             <div className="card-body text-center d-flex align-items-center justify-content-between px-2 py-3">
                                                                                 <div className="lds-dual-ring mx-auto"></div>
@@ -148,4 +150,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, { setTopics, setAlert, setNewTopic, startLoading, endLoading })(Topics)
+export default connect(mapStateToProps, { setTopics, setAlert, setNewTopic, startLoading, endLoading, setPosts })(Topics)

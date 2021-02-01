@@ -192,21 +192,21 @@ router.post('/add_comment', [auth,
 
         const post = await Post.findById(id);
 
-        let newComment = {
-            user: {
+        const newComment = post.comments.create({
+            author: {
                 id: user_id,
                 name
             },
             comment: {
                 text: comment
             }
-        }
+        });
 
         post.comments.push(newComment);
-
+        
         await post.save();
 
-        res.json({comments: post.comments});
+        res.json({comment: newComment});
 
         
     } catch (error) {
@@ -245,28 +245,26 @@ router.post('/add_comment_on_comment', [auth,
 
         let post = await Post.findById(postId);
 
+        // find comment and push sub comment to this comment
+        let commentIndex = post.comments.findIndex(comment => comment._id == commentId);
+
         // create sub comment
-        let newSubComment = {
-            user: {
+        const newSubComment = post.comments[commentIndex].comment.comments.create({
+            author: {
                 id: user_id,
                 name
             },
-            comment:{
+            comment: {
                 text: comment
             }
-
-        }
-
-        // find comment and push sub comment to this comment
-        let commentIndex = post.comments.findIndex(comment => comment._id == commentId);
-        post.comments[commentIndex].comment.comments.push(newSubComment);
-
+        });
         
-
+        // add new sub comment to sub comments array
+        post.comments[commentIndex].comment.comments.push(newSubComment);
 
         await post.save();
 
-        res.json({ comments: post.comments });
+        res.json({ newSubComment: newSubComment });
         
     } catch (error) {
         res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
@@ -298,7 +296,94 @@ router.delete('/delete_post/:id', auth, async (req, res) => {
     } catch (error) {
         res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
     }
-})
+});
 
+// desc: delete comment in certain post 
+// url: /topics/delete_post
+// private
+
+router.delete('/delete_comment/:postID/:commentID', auth, async (req, res) => {
+    
+    try {
+        
+        const { postID, commentID } = req.params;
+        const post = await Post.findById(postID);
+        
+
+        await post.comments.pull({ _id: commentID });
+        await post.save();
+
+        res.json({ msg: 'Comment is removed.' });
+
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
+    }
+});
+
+
+// desc: delete comment in certain post 
+// url: /topics/delete_post
+// private
+
+router.delete('/delete_subcomment/:postID/:commentID/:subcommentID', auth, async (req, res) => {
+    
+    try {
+        
+        const { postID, commentID, subcommentID } = req.params;
+
+        const post = await Post.findById(postID);
+        let commentIndex = post.comments.findIndex(comment => comment._id.toString() === commentID);
+
+        await post.comments[commentIndex].comment.comments.pull({ _id: subcommentID });
+        await post.save();
+
+        res.json({ msg: 'Subcomment is removed.' });
+
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
+    }
+});
+
+// desc: like/unlike post 
+// url: /topics/like_unlike/:postID
+// private
+
+router.post('/like_unlike/:postID', auth, async (req, res) => {
+    
+    try {
+        
+        const { postID } = req.params;
+        const { name, id } = req.user;
+        
+        const post = await Post.findById(postID);
+
+        // if user already liked
+        const removeIndex = post.likes.findIndex(like => like.author.id.toString() === id);
+        
+        // like if d'not exist
+        if (removeIndex === -1) {
+            let newLike = post.likes.create({
+                author: {
+                    id,
+                    name
+                }
+            });
+
+            await post.likes.push(newLike);
+            await post.save();
+
+            return res.json({ like: newLike, unlike: false });
+        }
+        
+        // remove like
+        let like = post.likes.splice(removeIndex, 1);
+        await post.save();
+        
+        res.json({ msg: 'Post is unliked.', like: like[0], unlike: true });
+ 
+    } catch (error) {
+        res.status(500).json({ errors: [{ msg: 'Ups, Something went wrong.', error }] });
+    }
+});
 
 module.exports = router;

@@ -3,7 +3,6 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import Navbar from './components/layout/Navbar/Navbar';
-import Alert from './components/layout/Alert/Alert';
 
 import Topics from './components/pages/Topics/Topics';
 import TopicPosts from './components/pages/TopicPosts/TopicPosts';
@@ -38,14 +37,12 @@ const App = ({ alert, endOfAuthLoading, logInUser, logOutUser }) => {
             
         }
         endOfAuthLoading();
-
+    // eslint-disable-next-line
     }, []);
 
     return (
         <Fragment>
             <Navbar />
-            
-            {/*<Alert alert={alert} /> stavi alert popup */}
             
 
             <Switch>

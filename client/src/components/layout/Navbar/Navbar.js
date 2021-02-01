@@ -42,7 +42,7 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
                 <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
             </li>
             <li className="nav-item">
-                <NavLink exact to="!#" className="nav-link" onClick={logOut} >Log Out</NavLink>
+                <NavLink exact to="" className="nav-link" onClick={logOut} >Log Out</NavLink>
             </li>
         </Fragment>
     }
@@ -51,7 +51,7 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
         <header className="Header">
             <nav className={navbarClasses} >
                 <div className="container px-0">
-                    <Link className="text-success text-decoration-none" to="/topics">POP_TOP_Blog</Link>
+                    <Link className="text-success text-decoration-none" to="/topics">POP_TOPICS</Link>
                     <button onClick={toggleMenuHendler} className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>

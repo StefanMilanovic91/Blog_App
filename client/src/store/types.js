@@ -14,8 +14,13 @@ export const SET_POSTS = 'SET_POSTS';
 export const SET_NEW_POST = 'SET_NEW_POST';
 export const REMOVE_POST = 'REMOVE_POST';
 
-export const START_POST_LOADING = 'START_POST_LOADING';
-export const END_POST_LOADING = 'END_POST_LOADING';
+export const ADD_COMMENT = "ADD_COMMENT";
+export const ADD_SUB_COMMENT = "ADD_SUB_COMMENT";
+export const REMOVE_COMMENT = "REMOVE_COMMENT";
+export const REMOVE_SUB_COMMENT = "REMOVE_SUB_COMMENT";
+    
+export const UPDATE_LIKE = "UPDATE_LIKE";
 
-export const END_LOADING = 'END_LOADING';
 export const START_LOADING = 'START_LOADING';
+export const END_LOADING = 'END_LOADING';
+

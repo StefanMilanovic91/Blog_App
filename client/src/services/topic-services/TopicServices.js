@@ -62,7 +62,40 @@ class TopicServices {
             }
         })
     }
+
+    static removeComment(postID, commentID, token) {
+        
+        return axios.delete(`/topics/delete_comment/${postID}/${commentID}`,  {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
+        })
+    }
+
+
+    static removeSubComment(postID, commentID, subCommentID, token) {
+        
+        return axios.delete(`/topics/delete_subcomment/${postID}/${commentID}/${subCommentID}`,  {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
+        })
+    }
+
+    static likeUnlike(postID, token) {
+        
+        return axios.post(`/topics/like_unlike/${postID}`, null, {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            }
+        });
+    }
  
+
+
 };
 
 

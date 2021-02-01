@@ -23,7 +23,7 @@ const PostSchema = new mongoose.Schema({
     },
     comments: [
         {
-            user: {
+            author: {
                 id: {
                     type: mongoose.Schema.Types.ObjectId,
                     required: true
@@ -40,7 +40,7 @@ const PostSchema = new mongoose.Schema({
                 },
                 comments: [
                     {
-                        user: {
+                        author: {
                             id: {
                                 type: mongoose.Schema.Types.ObjectId,
                                 required: true
@@ -63,7 +63,7 @@ const PostSchema = new mongoose.Schema({
     ],
     likes: [
         {
-            user: {
+            author: {
                 id: {
                     type: mongoose.Schema.Types.ObjectId,
                     required: true

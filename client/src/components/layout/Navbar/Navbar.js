@@ -3,8 +3,10 @@ import { connect } from 'react-redux';
 import { Link, NavLink } from 'react-router-dom'
 import AuthService from '../../../services/auth-service/AuthService';
 import { logOutUser } from '../../../store/actions/authActions';
+import IsAuth from '../../auxiliary/IsAuth';
+import NotAuth from '../../auxiliary/NotAuth';
 
-const Navbar = ({ isAuth, loading, logOutUser }) => {
+const Navbar = ({ isAuth, logOutUser }) => {
 
     const [toggleMenu, setToggleMenu] = useState(false);
 
@@ -24,29 +26,6 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
         logOutUser();
     }
 
-    let links = <Fragment>
-                    <li className="nav-item">
-                        <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
-                    </li>
-                    <li className="nav-item">
-                        <NavLink to="/register" className="nav-link" >Register</NavLink>
-                    </li>
-                    <li className="nav-item">
-                        <NavLink to="/login" className="nav-link" >Log In</NavLink>
-                    </li>
-                </Fragment>
-
-    if (isAuth && !loading){
-        links = <Fragment>
-            <li className="nav-item">
-                <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
-            </li>
-            <li className="nav-item">
-                <NavLink exact to="" className="nav-link" onClick={logOut} >Log Out</NavLink>
-            </li>
-        </Fragment>
-    }
-
     return (
         <header className="Header">
             <nav className={navbarClasses} >
@@ -58,7 +37,30 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
 
                     <div className="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul className="navbar-nav ml-auto text-center">
-                            {!loading && links}
+                            <NotAuth>
+                                <Fragment>
+                                    <li className="nav-item">
+                                        <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
+                                    </li>
+                                    <li className="nav-item">
+                                        <NavLink to="/register" className="nav-link" >Register</NavLink>
+                                    </li>
+                                    <li className="nav-item">
+                                        <NavLink to="/login" className="nav-link" >Log In</NavLink>
+                                    </li>
+                                </Fragment>
+                            </NotAuth>
+                            <IsAuth>
+                                <Fragment>
+                                    <li className="nav-item">
+                                        <NavLink exact to="/topics" className="nav-link" >Popular Topics</NavLink>
+                                    </li>
+                                    <li className="nav-item">
+                                        <NavLink exact to="" className="nav-link" onClick={logOut} >Log Out</NavLink>
+                                    </li>
+                                </Fragment>
+                            </IsAuth>
+                            
                         </ul>
                     </div>
                 </div>
@@ -69,8 +71,7 @@ const Navbar = ({ isAuth, loading, logOutUser }) => {
 
 const mapStateToProps = state => {
     return {
-        isAuth: state.authReducer.isAuthenticated,
-        loading: state.authReducer.loading
+        isAuth: state.authReducer.isAuthenticateds
     }
 }
 

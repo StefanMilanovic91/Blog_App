@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, useRef } from 'react';
+import { connect, useDispatch } from 'react-redux';
 
 // components
 import IsAuth from '../../../auxiliary/IsAuth';
@@ -9,25 +9,36 @@ import Alert from '../../../layout/Alert/Alert';
 import PostComment from './PostComment/PostComment';
 
 // actions
-import { setAlert } from '../../../../store/actions/alertActions';
 import { addComment, updateLike, removePost } from '../../../../store/actions/postActions';
-
-// hendlers
-import { addCommentHendler } from '../../../auxiliary/Hendlers/comment-hendlers';
-import { removePostHendler, updateLikeHendler } from '../../../auxiliary/Hendlers/post-hendlers';
 
 //icons
 import unlikeIconSrc from '../../../../assets/icons/unlike.png'
 import likeIconSrc from '../../../../assets/icons/like.jpg'
 
-const TopicPost = ({ userID, post, comments, setAlert, alert, addComment, updateLike, removePost }) => {
-    
+const TopicPost = ({ userID, post, alert }) => {
+
     const [comment, setComment] = useState({ comment: "" });
     const [postID, setPostID] = useState(null);
     const [likesShow, setLikesShow] = useState(false);
-    let userLiked = false;
-
     
+    const userLiked = useRef(false);// checkout bag on how is on liked list, try with useRef...
+    
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        
+        post.likes.forEach(like => {
+            if (userID === like.author.id) {
+                userLiked.current = true;
+            } else {
+                userLiked.current = false;
+            }
+            
+        });
+        console.log( 'test');
+        console.log(userLiked);
+    }, [])
+
     return (
         <div className="col-12 mb-5  px-0">
             <div className="card">
@@ -39,19 +50,22 @@ const TopicPost = ({ userID, post, comments, setAlert, alert, addComment, update
                         <div className={ likesShow ? "Posts__likes Posts__likes-show" : "Posts__likes" }>
                             {
                                 post.likes.map(like => {
-                                    userLiked = userID === like.author.id;
+                                    //userLiked = userID === like.author.id;
                                     return <p key={like._id} className="mb-1 mt-1">{like.author.name}</p>
                                 })
                             }
                         </div>
                     </div>
                     <IsAuth>
-                        <div onClick={(e) => updateLikeHendler(e, post._id, updateLike, setAlert)} className="Posts__like-btn">
-                            <img src={ !userLiked ? likeIconSrc : unlikeIconSrc} className="Posts__like-icon" alt="" />{ !userLiked ? 'Like' : 'Unlike'}
+                        <div onClick={(e) => { e.preventDefault(); dispatch(updateLike(post._id)); }} className="Posts__like-btn">
+                            {
+                                userLiked.current ? <><img src={likeIconSrc} className="Posts__like-icon" alt="" /><span>'Like'</span></> :
+                                                    <><img src={unlikeIconSrc} className="Posts__like-icon" alt="" /><span>'Unlike'</span></>
+                            }
                         </div>
                     </IsAuth>
                     <IsAuthor contentAuthorID={post.author.id} >
-                        <a onClick={() => removePostHendler(post._id, removePost, setAlert)} className="ml-5" href="/#" title="Delete Post"><img src="https://icon-library.net//images/delete-icon-png-16x16/delete-icon-png-16x16-21.jpg" width="20" alt="Delete post" /></a>
+                        <a onClick={(e) => { e.preventDefault(); dispatch(removePost(post._id)) }} className="ml-5" href="/#" title="Delete Post"><img src="https://icon-library.net//images/delete-icon-png-16x16/delete-icon-png-16x16-21.jpg" width="20" alt="Delete post" /></a>
                     </IsAuthor>
                 </div>
                 <div className="card-body">
@@ -60,15 +74,15 @@ const TopicPost = ({ userID, post, comments, setAlert, alert, addComment, update
                     </div>
 
                     {
-                        comments !== null && comments.length > 0 && comments.map(comment => {
-
-                            return <PostComment
-                                setPostID={setPostID}
-                                postId={post._id}
-                                comment={comment}
-                                key={comment._id}
-                            />
-                        })
+                        post.comments !== null &&
+                        post.comments.length > 0 &&
+                        post.comments.map(comment => <PostComment
+                                                        setPostID={setPostID}
+                                                        postId={post._id}
+                                                        comment={comment}
+                                                        subCmnts={comment.comment}
+                                                        key={comment._id}
+                                                    />)
                     }
                 </div>
                 <div className="card-footer">
@@ -80,7 +94,7 @@ const TopicPost = ({ userID, post, comments, setAlert, alert, addComment, update
                             <div className="input-group">
                                 <input onChange={(e) => setComment({ ...comment, [e.target.name]: e.target.value })} value={comment.comment} name="comment" type="text" className="form-control" placeholder="Comment on post" />
                                 <div className="input-group-append">
-                                    <button onClick={(e) => addCommentHendler(e, post._id, comment.comment, setComment, addComment, setAlert, setPostID)} className="btn btn-outline-success" type="button" id="button-addon2">Comment</button>
+                                    <button onClick={(e) => { e.preventDefault(); dispatch(addComment(post._id, comment.comment, setComment, setPostID)) }} className="btn btn-outline-success" type="button" id="button-addon2">Comment</button>
                                 </div>
                             </div>
                         </IsAuth>
@@ -99,4 +113,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, { setAlert, addComment, updateLike, removePost })(TopicPost)
+export default connect(mapStateToProps)(TopicPost)

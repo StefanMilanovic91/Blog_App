@@ -27,10 +27,10 @@ const removePost = (state, payload) => {
 }
 
 const addComment = (state, payload) => {
-    let posts = [...state.posts];
-    let postIndex = posts.findIndex(post => post._id === payload.postID);
+    let posts = state.posts.map(post => Object.assign({}, post));
+    let postIndex = posts.findIndex(post => post._id === payload.id);
     posts[postIndex].comments.push(payload.comment);
-
+    
     return {
         ...state,
         posts: posts
@@ -59,13 +59,13 @@ const updateLike = (state, payload) => {
 
 const addSubComment = (state, payload) => {
     
-    let posts = [...state.posts];
+    let posts = state.posts.map(post => Object.assign({}, post));
     let postIndex = posts.findIndex(post => post._id === payload.postID);
     
     let commentIndex = posts[postIndex].comments.findIndex(comment => comment._id === payload.commentID);
-    
-    posts[postIndex].comments[commentIndex].comment.comments.push(payload.comment);
-    
+    let subComm = [...posts[postIndex].comments[commentIndex].comment.comments]
+    posts[postIndex].comments[commentIndex].comment.comments = [...subComm,  {...payload.comment}];
+   
     return {
         ...state,
         posts: posts
@@ -74,7 +74,7 @@ const addSubComment = (state, payload) => {
 
 const removeComment = (state, payload) => {
 
-    let posts = [...state.posts];
+    let posts = state.posts.map(post => Object.assign({}, post));
     let postIndex = posts.findIndex(post => post._id === payload.postID);
     let newComments = posts[postIndex].comments.filter(comment => comment._id !== payload.commentID);
     posts[postIndex].comments = newComments;

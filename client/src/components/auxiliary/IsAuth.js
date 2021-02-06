@@ -10,4 +10,4 @@ const mapStateToProps = state => {
     }
 }
 
-export default connect(mapStateToProps, null)(IsAuth);
+export default connect(mapStateToProps)(IsAuth);

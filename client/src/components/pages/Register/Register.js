@@ -1,35 +1,21 @@
 import React, { useState } from 'react'
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import AuthService from '../../../services/auth-service/AuthService';
-import { setAlert } from '../../../store/actions/alertActions';
+
+import { registerUser } from '../../../store/actions/authActions';
 
 import Alert from '../../layout/Alert/Alert';
 
-const Register = ({ setAlert, alert }) => {
-
-    const [formData, setFormData] = useState({ name: "", email: "", password: "" });
-    const [startRegister, setStartRegister] = useState(false);
+const Register = () => {
 
     const history = useHistory();
+    const dispatch = useDispatch();
 
-    const submit = (e) => {
-        e.preventDefault();
-        setStartRegister(true);
-        // send register data
-        AuthService.register(formData).then(res => res.data).then(data => {
-            setStartRegister(false);
-            setAlert({ msg: data.msg, class: 'success' });
-            setTimeout(() => history.push('/login'), 3000);
-            
-            
-        }).catch(error => {
-            if (error.response.data.errors) {
-                setAlert({ msg: error.response.data.errors[0].msg, class: 'danger' });
-            }
-            setStartRegister(false);
-        });
-    }
+    const [formData, setFormData] = useState({ name: "", email: "", password: "" });
+    const [loading, setLoading] = useState(false);
+    
+    const alert = useSelector(state => state.alertReducer.alert);
+
 
     return (
         <div className="Page">
@@ -40,7 +26,7 @@ const Register = ({ setAlert, alert }) => {
                     </div>
                 </div>
 
-                {<Alert alert={alert} />}
+                { <Alert alert={alert} /> }
                 
                 <div className="row justify-content-center pt-5">
                     <div className="col-12 col-md-8">
@@ -57,7 +43,7 @@ const Register = ({ setAlert, alert }) => {
                                 <label htmlFor="password">Password</label>
                                 <input onChange={(e) => setFormData({ ...formData, [e.target.name]: e.target.value })} value={formData.password} name="password" type="password" className="form-control" placeholder="Set your password(min length 5 character)" />
                             </div>
-                            <button onClick={submit} className="btn btn-block btn-success">{!startRegister ? "SUBMIT" : <div className="lds-dual-ring"></div>}</button>
+                            <button onClick={(e) => { e.preventDefault(); dispatch(registerUser(formData, history, setLoading)) }} className="btn btn-block btn-success">{!loading ? "SUBMIT" : <div className="lds-dual-ring"></div>}</button>
                         </form>
                     </div>
                 </div>
@@ -66,10 +52,5 @@ const Register = ({ setAlert, alert }) => {
     )
 };
 
-const mapStateToProps = state => {
-    return {
-        alert: state.alertReducer.alert
-    }
-}
 
-export default connect(mapStateToProps, { setAlert })(Register)
+export default Register

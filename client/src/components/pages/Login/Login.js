@@ -1,33 +1,40 @@
 import React, { useState } from 'react'
-import AuthService from '../../../services/auth-service/AuthService';
-import { connect } from 'react-redux';
-import  jwt_decode  from 'jwt-decode';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
+import AuthServices from '../../../services/auth-service/AuthService';
+
+import jwt_decode from 'jwt-decode';
+
 import { logInUser } from '../../../store/actions/authActions';
 import { setAlert } from '../../../store/actions/alertActions';
-import { useHistory } from 'react-router-dom';
+
 
 import Alert from '../../layout/Alert/Alert';
 
-const Login = ({ logInUser, setAlert, alert }) => {
+const Login = () => {
 
-    const history = useHistory()
+    const history = useHistory();
+    const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [startLogin, setStartLogin] = useState(false);
     
+    const alert = useSelector(state => state.alertReducer.alert);
+
     const submit = (e) => {
         e.preventDefault();
         setStartLogin(true);
 
-        AuthService.logIn(formData).then(res => res.data).then(data => {
+        AuthServices.logIn(formData).then(res => res.data).then(data => {
             setStartLogin(false);
 
             // save token loacally
-            AuthService.saveDataLocally(JSON.stringify(data.token));
+            AuthServices.saveDataLocally(JSON.stringify(data.token));
 
             // save to store
             let decode = jwt_decode(data.token);
-            logInUser({ token: data.token, ...decode });
+            dispatch(logInUser({ token: data.token, ...decode }));
             
             // redirect to previous view
             history.push('/');
@@ -37,7 +44,7 @@ const Login = ({ logInUser, setAlert, alert }) => {
             let errors = err.response.data.errors;
             
             if (errors) {
-                setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
+                dispatch(setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' }));
             }
             
         });
@@ -78,10 +85,4 @@ const Login = ({ logInUser, setAlert, alert }) => {
     )
 };
 
-const mapStateToProps = state => {
-    return {
-        alert: state.alertReducer.alert
-    }
-}
-
-export default connect(mapStateToProps, { logInUser, setAlert })(Login);
+export default Login

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { connect, useDispatch } from 'react-redux';
+import React, { useState, useEffect, Fragment } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 // components
 import IsAuth from '../../../auxiliary/IsAuth';
@@ -15,53 +15,49 @@ import { addComment, updateLike, removePost } from '../../../../store/actions/po
 import unlikeIconSrc from '../../../../assets/icons/unlike.png'
 import likeIconSrc from '../../../../assets/icons/like.jpg'
 
-const TopicPost = ({ userID, post, alert }) => {
+const TopicPost = ({ post }) => {
+
+    const userID = useSelector(state => state.authReducer.user !== null && state.authReducer.user.id);
+    const alert = useSelector(state => state.alertReducer.alert);
 
     const [comment, setComment] = useState({ comment: "" });
     const [postID, setPostID] = useState(null);
     const [likesShow, setLikesShow] = useState(false);
-    
-    const userLiked = useRef(false);// checkout bag on how is on liked list, try with useRef...
-    
+    const [likeBtn, setLikeBtn] = useState(false);
+
     const dispatch = useDispatch()
 
     useEffect(() => {
         
-        post.likes.forEach(like => {
-            if (userID === like.author.id) {
-                userLiked.current = true;
-            } else {
-                userLiked.current = false;
-            }
-            
-        });
-        console.log( 'test');
-        console.log(userLiked);
-    }, [])
+        let likeIndex = post.likes.findIndex(like => userID === like.author.id);
+        if (likeIndex !== -1) 
+            setLikeBtn(false)
+        else 
+            setLikeBtn(true)
+        // eslint-disable-next-line
+    }, [post.likes]);
 
     return (
         <div className="col-12 mb-5  px-0">
             <div className="card">
                 <div className="card-header d-flex align-items-center">
-                    {post.post}
+                    {
+                        // post title
+                        post.post
+                    }
                     <div onClick={() => setLikesShow(!likesShow)} className="Posts__likes-holder">
                         <img src={likeIconSrc} className="Posts__like-icon" alt="likes" />
                         <span className="badge badge-info ml-1">{post.likes.length}</span>
                         <div className={ likesShow ? "Posts__likes Posts__likes-show" : "Posts__likes" }>
                             {
-                                post.likes.map(like => {
-                                    //userLiked = userID === like.author.id;
-                                    return <p key={like._id} className="mb-1 mt-1">{like.author.name}</p>
-                                })
+                                // show post likes
+                                post.likes.map(like => <p key={like._id} className="mb-1 mt-1">{like.author.name}</p> )
                             }
                         </div>
                     </div>
                     <IsAuth>
                         <div onClick={(e) => { e.preventDefault(); dispatch(updateLike(post._id)); }} className="Posts__like-btn">
-                            {
-                                userLiked.current ? <><img src={likeIconSrc} className="Posts__like-icon" alt="" /><span>'Like'</span></> :
-                                                    <><img src={unlikeIconSrc} className="Posts__like-icon" alt="" /><span>'Unlike'</span></>
-                            }
+                            { <Fragment><img src={likeBtn ? likeIconSrc : unlikeIconSrc} className="Posts__like-icon" alt="Like button" /><span>{likeBtn ? 'Like' : 'Unlike' }</span></Fragment> }
                         </div>
                     </IsAuth>
                     <IsAuthor contentAuthorID={post.author.id} >
@@ -74,13 +70,13 @@ const TopicPost = ({ userID, post, alert }) => {
                     </div>
 
                     {
+                        // render comments
                         post.comments !== null &&
                         post.comments.length > 0 &&
                         post.comments.map(comment => <PostComment
                                                         setPostID={setPostID}
                                                         postId={post._id}
                                                         comment={comment}
-                                                        subCmnts={comment.comment}
                                                         key={comment._id}
                                                     />)
                     }
@@ -101,16 +97,14 @@ const TopicPost = ({ userID, post, alert }) => {
                     </div>
                 </div>
             </div>
-            { postID === post._id && <Alert alert={alert} />}
+
+            {
+                // prevent a warning from appearing on every post
+                postID === post._id && alert && <Alert alert={alert} />
+            }
         </div>
     )
 }
 
-const mapStateToProps = state => {
-    return {
-        alert: state.alertReducer.alert,
-        userID: state.authReducer.user !== null && state.authReducer.user.id 
-    }
-}
 
-export default connect(mapStateToProps)(TopicPost)
+export default TopicPost

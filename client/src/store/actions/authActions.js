@@ -1,13 +1,31 @@
 import * as actionTypes from '../types';
 
-export const registerUser = (data) => dispatch => {
-    dispatch({
-        type: actionTypes.REGISTER_USER,
-        payload: data
+import AuthServices from '../../services/auth-service/AuthService';
+
+import { setAlert } from '../actions/alertActions';
+
+export const registerUser = (formData, history, setLoading) => dispatch => {
+
+    setLoading(true);
+        
+    AuthServices.register(formData).then(res => res.data).then(data => {
+        setLoading(false);
+        dispatch(setAlert({ msg: data.msg, class: 'success' }));
+        setTimeout(() => history.push('/login'), 3000);
+        
+        
+    }).catch(error => {
+        let errors = error.response.data.errors
+        if (errors) {
+            dispatch(setAlert({ msg: errors[0].msg, class: 'danger' }));
+        }
+        setLoading(false);
     });
+
 };
 
 export const logInUser = (data) => dispatch => {
+    
     dispatch({
         type: actionTypes.LOGIN_USER,
         payload: data

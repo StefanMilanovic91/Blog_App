@@ -3,18 +3,88 @@ import * as actionTypes from '../types';
 import AuthServices from '../../services/auth-service/AuthService';
 import TopicServices from '../../services/topic-services/TopicServices';
 
-export const setPosts = (posts) => dispatch => {
-    dispatch({
-        type: actionTypes.SET_POSTS,
-        payload: posts
-    });
+import { setAlert } from '../actions/alertActions';
+
+export const setPosts = (fetch, id, setLocalAlert, history) => dispatch => {
+
+    if (fetch) {
+        dispatch(startPostLoading());
+
+        TopicServices.getPostsByTopicId(id).then(res => res.data).then(data => {
+
+            dispatch({
+                type: actionTypes.SET_POSTS,
+                payload: data.posts
+            });
+
+            if(data.posts.length < 1) {
+                setLocalAlert({ msg: 'Posts not found.', class: 'danger' });
+            }
+            dispatch(endPostLoading());
+                
+        }).catch(err => {
+            dispatch(endPostLoading());
+
+            let errors = err.response.response.errors;
+            if (errors) {
+                dispatch({
+                    type: actionTypes.SET_ALERT,
+                    payload: { msg: errors[0].msg, class: 'success' }
+                });
+            }
+            setTimeout(() => history.push('/'), 3000);
+            
+        });
+    } else {
+        dispatch({
+            type: actionTypes.SET_POSTS,
+            payload: null
+        });
+    }
+    
+
+    
 };
 
-export const setNewPost = (post) => dispatch => {
-    dispatch({
-        type: actionTypes.SET_NEW_POST,
-        payload: post
-    });
+export const setNewPost = (newPost, id, setTypedPost, setLocalAlert) => dispatch => {
+
+    dispatch(startPostLoading());
+
+    let token = AuthServices.getLocalData();
+    
+        if (token) {
+    
+            TopicServices.addNewPost(newPost, token, id).then(res => res.data).then(data => {
+                // end of loading
+                dispatch(endPostLoading());
+                
+                // add new post to store
+                dispatch({
+                    type: actionTypes.SET_NEW_POST,
+                    payload: data.newPost
+                });
+
+                // clear input
+                setTypedPost({ post: "" });
+
+                // clear local alert
+                setLocalAlert(null);
+                
+            }).catch(err => {
+                dispatch(endPostLoading());
+                
+                let errors = err.response.data.errors;
+                if (errors) {
+                    dispatch(setAlert({ msg: errors[0].msg, class: 'danger' }));
+                }
+            });
+        } else {
+            dispatch({
+                type: actionTypes.LOGOUT_USER
+            });
+        }
+
+    
 };
 
 export const removePost = (id) => dispatch => {

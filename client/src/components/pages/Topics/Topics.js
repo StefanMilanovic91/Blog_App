@@ -1,78 +1,36 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import TopicServices from '../../../services/topic-services/TopicServices';
-import AuthService from '../../../services/auth-service/AuthService';
 import IsAuth from '../../auxiliary/IsAuth';
 import NotAuth from '../../auxiliary/NotAuth';
 
 import Topic from './Topic/Topic';
 import Alert from '../../layout/Alert/Alert';
 
-import { setTopics, setNewTopic, startLoading, endLoading } from '../../../store/actions/topicActions';
-import { setAlert } from '../../../store/actions/alertActions';
+import { setTopics, setNewTopic } from '../../../store/actions/topicActions';
 import { setPosts } from '../../../store/actions/postActions';
 
 
-const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNewTopic, startLoading, setPosts }) => {
+const Topics = () => {
 
-    
+    const dispatch = useDispatch();
     const [newTopic, setTypedTopic] = useState({ title: "" });
     
+    const name = useSelector(state => state.authReducer.user !== null && state.authReducer.user.name);
+    const topics = useSelector(state => state.topicReducer.topics);
+    const alert = useSelector(state => state.alertReducer.alert);
+    const topicsLoading = useSelector(state => state.topicReducer.loading);
+
     useEffect(() => {
-        setPosts(null);
+        dispatch(setPosts(false));
 
         if (topics.length === 0 && topics !== null) {
-
+            
             // get all topics
-            TopicServices.getAllTopics().then(res => res.data).then(data => {
-
-                // set topics to store
-                setTopics(data.topics);
-
-            }).catch(err => {
-                let errors = err.response.data.errors
-                if (errors) {
-                    setAlert({ msg: err.response.data.errors[0].msg, class: 'danger' });
-                } else {
-                    window.location.reload(); 
-                }
-            })
+            dispatch(setTopics());
         };
     // eslint-disable-next-line
     }, []);
-
-    
-    
-    
-
-
-    // add new topic request
-    
-
-    const submitTopic = (e) => {
-        e.preventDefault();
-        startLoading();
-        let token = AuthService.getLocalData();
-
-        if (token) {
-
-            TopicServices.addTopic({ title: newTopic.title }, token).then(res => res.data).then(data => {
-                
-                // update topics
-                setNewTopic(data.topic);
-                setAlert({msg: data.msg, class: "success"});
-        
-
-            }).catch(err => {
-                let errors = err.response.data.errors
-                if(errors)
-                setAlert({msg: errors[0].msg, class: 'danger'});
-        
-            });
-        }
-        
-    }
 
     
 
@@ -131,7 +89,7 @@ const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNew
                                 <div className="form-group">
                                     <input onChange={(e) => setTypedTopic({ ...newTopic, [e.target.name]: e.target.value })} value={newTopic.title} type="text" className="form-control" placeholder="Name of the New Topic" name="title" />
                                 </div>
-                                <button onClick={submitTopic} className="btn btn-info d-block mr-auto">ADD TOPIC</button>
+                                <button onClick={(e) => { e.preventDefault(); dispatch(setNewTopic(newTopic, setTypedTopic)) }} className="btn btn-info d-block mr-auto">ADD TOPIC</button>
                             </div>
                         </div>
                     </div>
@@ -141,13 +99,5 @@ const Topics = ({name, topics, setTopics, setAlert, alert, topicsLoading, setNew
     )
 }
 
-const mapStateToProps = state => {
-    return {
-        name: state.authReducer.user !== null && state.authReducer.user.name,
-        topics: state.topicReducer.topics,
-        alert: state.alertReducer.alert,
-        topicsLoading: state.topicReducer.loading
-    }
-}
 
-export default connect(mapStateToProps, { setTopics, setAlert, setNewTopic, startLoading, endLoading, setPosts })(Topics)
+export default Topics

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import IsAuth from '../../../../auxiliary/IsAuth';
 import IsAuthor from '../../../../auxiliary/IsAuthor';
@@ -11,8 +11,6 @@ const PostComment = ({ comment, setPostID, postId }) => {
 
     const [commentOnComment, setCommentOnComment] = useState({ comment: "" });
     const subComments = comment.comment.comments;
-    
-    const posts = useSelector(state => state.postReducer);
 
     const dispatch = useDispatch();
     
@@ -30,6 +28,7 @@ const PostComment = ({ comment, setPostID, postId }) => {
                 </IsAuth>
             </div>
             {
+                // render subcomments
                 subComments.length > 0 && subComments.map(subComment => <div key={subComment._id} className="container ml-3">
                         <div className="d-flex flex-column pl-5">
                             <div className="divider pl-5"></div>

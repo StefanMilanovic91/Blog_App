@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import Navbar from './components/layout/Navbar/Navbar';
 
@@ -16,27 +16,34 @@ import jwt_decode from 'jwt-decode';
 
 
 
-const App = ({ alert, endOfAuthLoading, logInUser, logOutUser }) => { 
+const App = () => { 
+
+    const dispatch = useDispatch();
 
     useEffect(() => { 
 
         // check local data
         let token = AuthService.getLocalData();
-        if (token !== null) {
+        
+        if (token) {
             let decodedToken = jwt_decode(token);
+            
             let currTime = Math.floor(Date.now() / 1000);
 
             if (currTime > decodedToken.exp) {
+                
+                // clear local storage
+                AuthService.removeLocalData();
 
                 // logout User
-                logOutUser();
-                AuthService.removeLocalData();
+                dispatch(logOutUser());
+                
             } else {
-                logInUser({token, ...decodedToken}); 
+                dispatch(logInUser({token, ...decodedToken})); 
             }
             
         }
-        endOfAuthLoading();
+        dispatch(endOfAuthLoading());
     // eslint-disable-next-line
     }, []);
 
@@ -60,10 +67,4 @@ const App = ({ alert, endOfAuthLoading, logInUser, logOutUser }) => {
     )
 }
 
-const mapStateToProps = state => {
-    return {
-        alert: state.alertReducer.alert
-    }
-}
-
-export default connect(mapStateToProps, { endOfAuthLoading, logInUser, logOutUser })(App)
+export default App

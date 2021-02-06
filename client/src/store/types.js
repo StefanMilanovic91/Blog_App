@@ -1,6 +1,7 @@
 export const REGISTER_USER = 'REGISTER_USER';
 export const LOGIN_USER = 'LOGIN_USER';
 export const LOGOUT_USER = 'LOGOUT_USER';
+export const START_AUTH_LOADING = 'END_OF_AUTH_LOADING';
 export const END_OF_AUTH_LOADING = 'END_OF_AUTH_LOADING';
 
 export const SET_ALERT = 'SET_ALERT';
